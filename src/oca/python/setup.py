@@ -1,6 +1,6 @@
 # Copyright 2018 www.privaz.io Valletech AB
 # Copyright 2002-2018, OpenNebula Project, OpenNebula Systems
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -32,7 +32,7 @@ setup(
     long_description=long_description,
 
     # The project's main homepage.
-    url='http://privaz.io',
+    url='http://opennebula.org',
 
     # Author details
     author='Rafael del Valle',
@@ -62,9 +62,6 @@ setup(
         'aenum',
         'tblib'
     ],
-    package_data={
-        'pyone': ['xsd/*.xsd'],
-    },
     extras_require={
         'dev': ['check-manifest'],
         'test': ['coverage'],
