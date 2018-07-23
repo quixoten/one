@@ -1,4 +1,4 @@
-#!/bin/bash
+# SConstruct for share/scripts/rubygems
 
 # -------------------------------------------------------------------------- #
 # Copyright 2002-2018, OpenNebula Project, OpenNebula Systems                #
@@ -16,6 +16,13 @@
 # limitations under the License.                                             #
 #--------------------------------------------------------------------------- #
 
-pip install setuptools wheel generateds # Build dependencies
-# make									# Create python package from xsd
-python setup.py sdist bdist_wheel		# Create python package
+import os
+
+Import('env')
+
+print "Generating pyone bindings\n"
+exit_code = os.system("make")
+
+if exit_code != 0:
+    print "Error generating pyone bindings\n"
+    exit(-1)
