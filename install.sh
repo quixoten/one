@@ -256,6 +256,9 @@ LIB_DIRS="$LIB_LOCATION/ruby \
           $LIB_LOCATION/ruby/vendors \
           $LIB_LOCATION/mads \
           $LIB_LOCATION/sh \
+          $LIB_LOCATION/python \
+          $LIB_LOCATION/python/pyone \
+          $LIB_LOCATION/python/pyone/bindings \
           $LIB_LOCATION/ruby/cli \
           $LIB_LOCATION/ruby/cli/one_helper \
           $LIB_LOCATION/ruby/vcenter_driver"
@@ -393,7 +396,8 @@ INSTALL_FILES=(
     RUBY_LIB_FILES:$LIB_LOCATION/ruby
     RUBY_AUTH_LIB_FILES:$LIB_LOCATION/ruby/opennebula
     RUBY_OPENNEBULA_LIB_FILES:$LIB_LOCATION/ruby/opennebula
-    PYTHON_OPENNEBULA_LIB_FILES:$LIB_LOCATION/python
+    PYONE_BINDINGS:$LIB_LOCATION/python/pyone/bindings
+    PYONE_FILES:$LIB_LOCATION/python/pyone
     MAD_RUBY_LIB_FILES:$LIB_LOCATION/ruby
     MAD_RUBY_LIB_FILES:$VAR_LOCATION/remotes
     MAD_SH_LIB_FILES:$LIB_LOCATION/sh
@@ -1480,13 +1484,17 @@ RUBY_OPENNEBULA_LIB_FILES="src/oca/ruby/opennebula/acl_pool.rb \
                             src/oca/ruby/opennebula/marketplaceapp.rb \
                             src/oca/ruby/opennebula/utils.rb"
 
-PYTHON_OPENNEBULA_LIB_FILES="src/oca/python/pyone/__init__.py \
-                             src/oca/python/pyone/helpers.py \
-                             src/oca/python/pyone/server.py \
-                             src/oca/python/pyone/tester.py \
-                             src/oca/python/pyone/util.py \
-                             src/oca/python/pyone/bindings/__init__.py \
-                             src/oca/python/pyone/bindings/supbind.py"
+PYONE_FILES="src/oca/python/pyone/__init__.py \
+             src/oca/python/pyone/helpers.py \
+             src/oca/python/pyone/server.py \
+             src/oca/python/pyone/tester.py \
+             src/oca/python/pyone/util.py"
+
+PYONE_BINDINGS="src/oca/python/pyone/bindings/__init__.py \
+                src/oca/python/pyone/bindings/supbind.py"
+                            
+                            
+                            
 
 #-------------------------------------------------------------------------------
 # Common Cloud Files
