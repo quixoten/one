@@ -1480,13 +1480,13 @@ RUBY_OPENNEBULA_LIB_FILES="src/oca/ruby/opennebula/acl_pool.rb \
                             src/oca/ruby/opennebula/marketplaceapp.rb \
                             src/oca/ruby/opennebula/utils.rb"
 
-PYTHON_OPENNEBULA_LIB_FILES="src/oca/python/pyone/__init__.py" \
-                            "src/oca/python/pyone/helpers.py" \
-                            "src/oca/python/pyone/server.py" \
-                            "src/oca/python/pyone/tester.py" \
-                            "src/oca/python/pyone/util.py" \
-                            "src/oca/python/pyone/bindings/__init__.py" \
-                            "src/oca/python/pyone/bindings/supbind.py"
+PYTHON_OPENNEBULA_LIB_FILES="src/oca/python/pyone/__init__.py \
+                             src/oca/python/pyone/helpers.py \
+                             src/oca/python/pyone/server.py \
+                             src/oca/python/pyone/tester.py \
+                             src/oca/python/pyone/util.py \
+                             src/oca/python/pyone/bindings/__init__.py \
+                             src/oca/python/pyone/bindings/supbind.py"
 
 #-------------------------------------------------------------------------------
 # Common Cloud Files
