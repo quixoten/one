@@ -90,8 +90,7 @@ main_env.Append(LIBPATH=[
     cwd+'/src/vdc',
     cwd+'/src/vrouter',
     cwd+'/src/market',
-    cwd+'/src/ipamm',
-    cwd+'/src/oca/python'
+    cwd+'/src/ipamm'
 ])
 
 # Compile flags
@@ -267,7 +266,8 @@ build_scripts = [
     'share/rubygems/SConstruct',
     'src/im_mad/collectd/SConstruct',
     'src/client/SConstruct',
-    'src/docker_machine/SConstruct'
+    'src/docker_machine/SConstruct',
+    'src/oca/python/SConstruct'
 ]
 
 for script in build_scripts:
