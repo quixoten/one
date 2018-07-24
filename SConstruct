@@ -161,6 +161,7 @@ if build_parsers == 'yes':
 else:
     main_env.Append(parsers='no')
 
+
 # Rubygem generation
 main_env.Append(rubygems=ARGUMENTS.get('rubygems', 'no'))
 
@@ -266,9 +267,15 @@ build_scripts = [
     'share/rubygems/SConstruct',
     'src/im_mad/collectd/SConstruct',
     'src/client/SConstruct',
-    'src/docker_machine/SConstruct',
-    'src/oca/python/SConstruct'
+    'src/docker_machine/SConstruct'
 ]
+
+# pyone
+pyone = ARGUMENTS.get('pyone', 'no')
+if pyone == 'yes':
+    build_scripts.append('src/oca/python/SConstruct')
+else:
+    pass
 
 for script in build_scripts:
     env = main_env.Clone()
