@@ -16,6 +16,7 @@
 # limitations under the License.                                             #
 #--------------------------------------------------------------------------- #
 
-pip install setuptools wheel  # Build dependencies
+pip install setuptools wheel generateds # Build dependencies
+pip install lxml dicttoxml xmltodict six future aenum tblib # Runtime and Doc generation dependencies
 make
 python setup.py sdist bdist_wheel		# Create python package
