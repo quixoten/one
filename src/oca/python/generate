@@ -16,6 +16,6 @@
 # limitations under the License.                                             #
 #--------------------------------------------------------------------------- #
 
-pip install setuptools wheel generateds # Build dependencies
-# make									# Create python package from xsd
+pip install setuptools wheel  # Build dependencies
+make
 python setup.py sdist bdist_wheel		# Create python package
