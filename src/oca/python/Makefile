@@ -32,8 +32,7 @@ pyone/bindings/__init__.py pyone/bindings/supbind.py: $(schemas)
 
 .PHONY: clean build
 clean:
-	rm -f pyone/bindings/*.py
-	rm -rf build dist
+	rm -rf build dist pyone/bindings pyone.egg-info
 
 dist: clean all
 	${PYTHON} setup.py sdist bdist_wheel
