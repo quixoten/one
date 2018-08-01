@@ -1,5 +1,3 @@
-#!/bin/sh
-
 # -------------------------------------------------------------------------- #
 # Copyright 2002-2018, OpenNebula Project, OpenNebula Systems                #
 #                                                                            #
@@ -15,6 +13,17 @@
 # See the License for the specific language governing permissions and        #
 # limitations under the License.                                             #
 #--------------------------------------------------------------------------- #
-STDIN=`cat -`
 
-exit 0
+module Migrator
+    def db_version
+        "5.6.0"
+    end
+
+    def one_version
+        "OpenNebula 5.6.0"
+    end
+
+    def up
+        return true
+    end
+end
