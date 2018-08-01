@@ -17,6 +17,6 @@
 #--------------------------------------------------------------------------- #
 
 pip install setuptools wheel generateds # Build dependencies
-pip install lxml dicttoxml xmltodict six future aenum tblib # Runtime and Doc generation dependencies
+pip install -r requirements.txt # Runtime dependencies
 make
 python setup.py sdist bdist_wheel		# Create python package
