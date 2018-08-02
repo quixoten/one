@@ -16,7 +16,7 @@
 # limitations under the License.                                             #
 #--------------------------------------------------------------------------- #
 
-pip install setuptools wheel generateds # Build dependencies
-pip install -r requirements.txt # Runtime dependencies
-make
-python setup.py sdist bdist_wheel		# Create python package
+pip install generateds # Install build dependencies
+make dist		       # Create python package
+pip install requirements.txt # pydoc generation required deps
+make doc
