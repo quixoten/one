@@ -24,7 +24,7 @@ src/oca/java/java-oca*.tar.gz
 src/oca/python/pyone/bindings
 src/oca/python/build/
 src/oca/python/dist/
-src/oca/python/pyone.egg-info/
+src/oca/python/opennebula.egg-info/
 src/oca/python/pyone.html
 
 src/docker_machine/pkg
