@@ -2461,6 +2461,10 @@ class VmmImporter < VCenterDriver::VcImporter
         @defaults = {}
     end
 
+    def list(key, list)
+        @list = {"" => list}
+    end
+
     def request_vnc(vc_vm)
         one_vm = vc_vm.one_item
         vnc_port  = one_vm["TEMPLATE/GRAPHICS/PORT"]
@@ -2483,11 +2487,16 @@ class VmmImporter < VCenterDriver::VcImporter
         end
     end
 
+    def build
+        xml = OpenNebula::VirtualMachine.build_xml
+        vm = OpenNebula::VirtualMachine.new(xml, @one_client)
+    end
+
     def import(selected)
-        vm_ref     = selected[:wild]["DEPLOY_ID"]
-        vm         = selected[:one_item]
-        template   = selected[:template]
-        host_id    = selected[:host]
+        vm_ref     = selected["DEPLOY_ID"]
+        vm         = selected[:one_item] || build
+        template   = selected[:template] || Base64.decode64(selected['IMPORT_TEMPLATE'])
+        host_id    = selected[:host]     || @list.keys[0]
 
         vc_uuid    = @vi_client.vim.serviceContent.about.instanceUuid
         vc_name    = @vi_client.vim.host
@@ -2510,7 +2519,7 @@ class VmmImporter < VCenterDriver::VcImporter
                                                             vc_name,
                                                             vm_ref)
         opts = {uuid: vc_uuid, npool: npool, error: error }
-        RAction.delete_ars(ar_ids, opts) if !error.empty?
+        Raction.delete_ars(ar_ids, opts) if !error.empty?
 
         template << template_nics
         template << "VCENTER_ESX_HOST = #{vc_vm["runtime.host.name"].to_s}\n"

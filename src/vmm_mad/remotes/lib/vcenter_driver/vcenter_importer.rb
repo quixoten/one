@@ -333,7 +333,7 @@ module VCenterDriver
 		# @return [Hash] Hash with all the info related to the reference
 		#
         def get_element(ref)
-            raise "the list is empty" if list_empty? || list.values[0].empty?
+            raise "the list is empty" if list_empty? || @list.values[0].empty?
 
             list = @list.values[0]
 
