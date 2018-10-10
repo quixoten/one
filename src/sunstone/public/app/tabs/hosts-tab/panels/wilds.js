@@ -113,8 +113,6 @@ define(function(require) {
           ];
 
           that.dataTableWildHosts.fnAddData(wilds_list_array);
-          elem.HYPERVISOR = that.element.VM_MAD;
-          elem.HOST_ID = that.element.ID;
           $(".import_wild_checker.import_" + index, context).data("import_data", elem);
         }
       });
@@ -159,6 +157,7 @@ define(function(require) {
           data: {
             wilds: vcenter_refs.join(","),
             opts: opts,
+            host: that.element.ID,
             timeout: false
           },
           dataType: "json",
