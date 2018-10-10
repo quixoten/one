@@ -141,30 +141,39 @@ define(function(require) {
       $("#import_wilds", context).attr("disabled", "disabled").on("click.disable", function(e) { return false; });
       $("#import_wilds", context).html('<i class="fas fa-spinner fa-spin"></i>');
 
-      $(".import_wild_checker:checked", "#datatable_host_wilds").each(function() {
-        var wild_obj = $(this).data("import_data");
-        var wild_row = $(this).closest('tr');
-        var aData = that.dataTableWildHosts.fnGetData(wild_row);
+      if (that.element.TEMPLATE.HYPERVISOR === "vcenter"){
+        var path = "/vcenter/wild";
+        var resource = "Wild";
+        var vcenter_refs = [];
+        var opts = {};
+        $(".import_wild_checker:checked", "#datatable_host_wilds").each(function() {
+          var wild_obj = $(this).data("import_data");
+          var ref = wild_obj.DEPLOY_ID;
+          vcenter_refs.push(ref);
+          opts[ref] = wild_obj;
+        });
 
-        if (wild_obj.HYPERVISOR === "vcenter"){
-          var path = "/vcenter/wild";
-          var resource = "Wild";
+        $.ajax({
+          url: path,
+          type: "POST",
+          data: {
+            wilds: vcenter_refs.join(","),
+            opts: opts,
+            timeout: false
+          },
+          dataType: "json",
+          success: function(response){
 
-          $.ajax({
-            url: path,
-            type: "POST",
-            data: { datastores: vcenter_refs, timeout: false },
-            dataType: "json",
-            success: function(response){
+          },
+          error: function (request, error_json) {
 
-            },
-            error: function (request, error_json) {
+          }
+        });
+      } else {
+        $(".import_wild_checker:checked", "#datatable_host_wilds").each(function() {
+          var wild_row = $(this).closest('tr');
+          var aData = that.dataTableWildHosts.fnGetData(wild_row);
 
-            }
-          });
-        }
-
-        else {
           var dataJSON = {
             'id': that.element.ID,
             'extra_param': {
@@ -190,8 +199,8 @@ define(function(require) {
               wildsError(error_json, context);
             }
           });
-        }
-      });
+        });
+      }
     });
 
     return false;
