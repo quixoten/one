@@ -2507,7 +2507,7 @@ class VmmImporter < VCenterDriver::VcImporter
 
         type = {:object => "VM", :id => vname}
         error, template_disks = vc_vm.import_vcenter_disks(vc_uuid, dpool, ipool, type)
-        return OpenNebula::Error.new(error) if !error.empty?
+        raise error if !error.empty?
 
         template << template_disks
 
