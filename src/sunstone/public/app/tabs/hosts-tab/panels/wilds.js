@@ -25,12 +25,9 @@ define(function(require) {
   var CanImportWilds = require('../utils/can-import-wilds');
   var OpenNebulaHost = require('opennebula/host');
   var OpenNebulaAction = require('opennebula/action');
-  var OpenNebulaNetwork = require('opennebula/network');
-  var OpenNebulaImage = require('opennebula/image');
-  var OpenNebulaError = require('opennebula/error');
-  var Sunstone = require('sunstone');
   var Notifier = require('utils/notifier');
   var Navigation = require('utils/navigation');
+  var VCenterCommon = require('utils/vcenter/vcenter-common');
 
   /*
     TEMPLATES
@@ -162,11 +159,22 @@ define(function(require) {
           },
           dataType: "json",
           success: function(response){
-
+            console.log(response);
+            VCenterCommon.jGrowlSuccess({success : response.success, resource : resource, link_tab : "templates-tab"});
+            VCenterCommon.jGrowlFailure({error : response.error, resource : resource});
           },
           error: function (request, error_json) {
-
+            if (request.responseJSON === undefined){
+              Notifier.notifyError("Empty response received from server. Check your setup to avoid timeouts");
+            } else {
+              Notifier.notifyError(request.responseJSON.error.message);
+            }
+          },
+          complete: function (data) {
+            $("#import_wilds", context).removeAttr("disabled").off("click.disable");
+            $("#import_wilds", context).html(Locale.tr("Import Wilds"));
           }
+
         });
       } else {
         $(".import_wild_checker:checked", "#datatable_host_wilds").each(function() {
@@ -190,12 +198,13 @@ define(function(require) {
               Navigation.link(" ID: " + response.VM.ID, "vms-tab", response.VM.ID), false);
               // Delete row (shouldn't be there in next monitorization)
               that.dataTableWildHosts.fnDeleteRow(wild_row);
-
-              $("#import_wilds", context).removeAttr("disabled").off("click.disable");
-              $("#import_wilds", context).html(Locale.tr("Import Wilds"));
             },
             error: function (request, error_json) {
               wildsError(error_json, context);
+            },
+            complete: function (data) {
+              $("#import_wilds", context).removeAttr("disabled").off("click.disable");
+              $("#import_wilds", context).html(Locale.tr("Import Wilds"));
             }
           });
         });
@@ -213,8 +222,5 @@ define(function(require) {
       msg = Locale.tr("Cannot contact server: is it running and reachable?");
     }
     Notifier.notifyError(msg);
-
-    $("#import_wilds", context).removeAttr("disabled").off("click.disable");
-    $("#import_wilds", context).html(Locale.tr("Import Wilds"));
   }
 });
