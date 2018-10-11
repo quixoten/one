@@ -159,8 +159,10 @@ define(function(require) {
           },
           dataType: "json",
           success: function(response){
-            console.log(response);
-            VCenterCommon.jGrowlSuccess({success : response.success, resource : resource, link_tab : "templates-tab"});
+            $.each(response.success, function(key, value){
+              Notifier.notifyCustom(Locale.tr("VM imported"),
+              Navigation.link(" ID: " + value, "vms-tab", value), false);
+            });
             VCenterCommon.jGrowlFailure({error : response.error, resource : resource});
           },
           error: function (request, error_json) {
@@ -174,7 +176,6 @@ define(function(require) {
             $("#import_wilds", context).removeAttr("disabled").off("click.disable");
             $("#import_wilds", context).html(Locale.tr("Import Wilds"));
           }
-
         });
       } else {
         $(".import_wild_checker:checked", "#datatable_host_wilds").each(function() {
