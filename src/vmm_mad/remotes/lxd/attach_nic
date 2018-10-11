@@ -15,19 +15,12 @@ vm_id = ARGV[6]
 host = ARGV[7]
 
 info = LXDriver.action_xml
-
 nics = info.multiple_elements('NIC')
-
-def get_nic(nics, mac)
-    nics.each do |nic|
-        return nic['NIC'] if nic['NIC'].value?(mac)
-    end
-end
+nic_info = LXDriver.device_info(nics, 'NIC', mac)
 
 client = LXDClient.new
 container = Container.get(vm_name, client)
 
-nic_info = get_nic(nics, mac)
 container.devices.update(info.nic(nic_info))
 container.update
 

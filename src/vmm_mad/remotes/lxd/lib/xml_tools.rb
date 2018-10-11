@@ -121,7 +121,7 @@ module LXDriver
         def context
             info = complex_element('CONTEXT')
             disk_id = info['DISK_ID']
-            source = LXDriver.device_path(self, "#{@vm_id}/mapper", disk_id)
+            source = LXDriver.device_path(self, disk_id, 'mapper/')
             data = disk_basic(source, '/mnt')
             { 'context' => data }
         end
@@ -129,7 +129,7 @@ module LXDriver
         def disk(info)
             disk = disk_common(info)
             disk_id = info['DISK_ID']
-            source = LXDriver.device_path(self, "#{@vm_id}/mapper", disk_id)
+            source = LXDriver.device_path(self, disk_id, 'mapper/')
             path = info['TARGET'] # TODO: path is TARGET: hda, hdc, hdd
             path = "/media/#{disk_id}" unless path.include?('/')
             { "disk#{disk_id}" => disk.update(disk_basic(source, path)) }
@@ -182,6 +182,12 @@ module LXDriver
         ###############
         # XML Parsing #
         ###############
+
+        def device_info(devices, key, filter)
+            devices.each do |device|
+                return device[key] if device[key].value?(filter)
+            end
+        end
 
         # Returns PATH's instance in XML
         def xml_single_element(path)

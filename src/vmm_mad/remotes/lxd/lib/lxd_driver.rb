@@ -59,8 +59,8 @@ module LXDriver
         end
 
         # Creates an XML object from driver action template
-        def action_xml
-            XML.new(STDIN.read, XML::HOTPLUG_PREFIX)
+        def action_xml(xml = STDIN.read)
+            XML.new(xml, XML::HOTPLUG_PREFIX)
         end
 
         # Returns a mapper class depending on the driver string
@@ -73,8 +73,8 @@ module LXDriver
             end
         end
 
-        def device_path(info, vm_id, disk_id)
-            "#{info.datastores}/#{info.sysds_id}/#{vm_id}/disk.#{disk_id}"
+        def device_path(info, disk_id, dir = '')
+            "#{info.datastores}#{info.sysds_id}/#{info.vm_id}/#{dir}disk.#{disk_id}"
         end
 
         # TODO: VNC server
@@ -100,11 +100,11 @@ module LXDriver
                 disk_info = disk['DISK']
                 disk_id = disk_info['DISK_ID']
 
-                mountpoint = device_path(info, "#{vm_id}/mapper", disk_id)
+                mountpoint = device_path(info, disk_id, 'mapper/')
                 mountpoint = CONTAINERS + 'one-' + vm_id if disk_id == info.rootfs_id
 
                 mapper = select_driver(disk_info['DRIVER'])
-                device = device_path(info, vm_id, disk_id)
+                device = device_path(info, disk_id)
                 mapper.run(action, mountpoint, device)
             end
 
