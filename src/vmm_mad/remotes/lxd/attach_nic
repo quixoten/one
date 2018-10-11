@@ -16,7 +16,7 @@ host = ARGV[7]
 
 info = LXDriver.action_xml
 nics = info.multiple_elements('NIC')
-nic_info = LXDriver.device_info(nics, 'NIC', mac)
+nic_info = info.device_info(nics, 'NIC', mac)
 
 client = LXDClient.new
 container = Container.get(vm_name, client)
