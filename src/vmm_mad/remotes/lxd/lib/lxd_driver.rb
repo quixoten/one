@@ -108,7 +108,7 @@ module LXDriver
                 mapper.run(action, mountpoint, device)
             end
 
-            if info.complex_element('CONTEXT')
+            if info.single_element('CONTEXT')
                 context(info.context['context']['source'], action)
             end
         end
