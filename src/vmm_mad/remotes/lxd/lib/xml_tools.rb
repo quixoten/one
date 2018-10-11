@@ -72,20 +72,7 @@ module LXDriver
             # disks
             if disks.length > 1
                 disks.each {|d| disks.insert(0, d).uniq if d['ID'] == @rootfs_id }
-
-                disks[1..-1].each do |disk|
-                    info = disk['DISK']
-                    disk_id = info['DISK_ID']
-
-                    source = LXDriver.device_path(self, "#{@vm_id}/mapper", disk_id)
-                    path = info['TARGET'] # TODO: path is TARGET: hda, hdc, hdd
-                    path = "/media/#{disk_id}" unless path.include?('/')
-
-                    disk_config = { 'type' => 'disk', 'path' => path, 'source' => source }
-                    disk_config.update(disk_common(info))
-
-                    hash['disk' + disk_id] = disk_config
-                end
+                disks[1..-1].each {|disk| hash.update(disk(disk['DISK'])) }
             end
 
             # root
@@ -135,28 +122,35 @@ module LXDriver
             info = complex_element('CONTEXT')
             disk_id = info['DISK_ID']
             source = LXDriver.device_path(self, "#{@vm_id}/mapper", disk_id)
-            data = disk(source, '/mnt')
+            data = disk_basic(source, '/mnt')
             { 'context' => data }
         end
 
-        # TODO: IO
-        # TODO: disk_common
-        # Creates a disk hash
-        def disk(source, path)
+        def disk(info)
+            disk = disk_common(info)
+            disk_id = info['DISK_ID']
+            source = LXDriver.device_path(self, "#{@vm_id}/mapper", disk_id)
+            path = info['TARGET'] # TODO: path is TARGET: hda, hdc, hdd
+            path = "/media/#{disk_id}" unless path.include?('/')
+            { "disk#{disk_id}" => disk.update(disk_basic(source, path)) }
+        end
+
+        # Creates the minial disk hash
+        def disk_basic(source, path)
             { 'type' => 'disk', 'source' => source, 'path' => path }
         end
 
         def disk_common(info)
             config = { 'readonly' => 'false' }
             config['readonly'] = 'true' if info['READONLY'] == 'yes'
-            disk_io(config, info)
+            config.update(disk_io(info))
         end
 
         # TODO: TOTAL_IOPS_SEC
-        def disk_io(disk, info)
+        def disk_io(info)
             lxdl = %w[limits.read limits.write limits.max]
             onel = %w[READ_BYTES_SEC WRITE_BYTES_SEC TOTAL_BYTES_SEC]
-            disk.update(io(lxdl, onel, info))
+            io(lxdl, onel, info)
         end
 
         ###############
