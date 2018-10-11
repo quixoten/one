@@ -14,19 +14,21 @@ host_nic = ARGV[5]
 vm_id = ARGV[6]
 host = ARGV[7]
 
-# Create container object
-# OpenNebula.log(STDIN.read)
-xml_file = STDIN.read
-# info = LXDriver::Info.new(xml_file)
+info = LXDriver.action_xml
+
+nics = info.multiple_elements('NIC')
+
+def get_nic(nics, mac)
+    nics.each do |nic|
+        return nic['NIC'] if nic['NIC'].value?(mac)
+    end
+end
 
 client = LXDClient.new
 container = Container.get(vm_name, client)
 
-name = "eth#{host_nic.split('-')[-1]}"
-eth = LXDriver.nic(name, host_nic, bridge, mac)
-
-# TODO: get QoS data from STDIN
-container.devices.update(name => eth)
+nic_info = get_nic(nics, mac)
+container.devices.update(info.nic(nic_info))
 container.update
 
 LXDriver.log_end(t0)

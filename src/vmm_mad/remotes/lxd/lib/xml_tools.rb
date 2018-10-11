@@ -8,12 +8,13 @@ module LXDriver
     class XML
 
         TEMPLATE_PREFIX = '//TEMPLATE/'
+        HOTPLUG_PREFIX = 'VMM_DRIVER_ACTION_DATA/'
 
-        attr_reader :vm_id, :datastores, :sysds_id, :rootfs_id
+        attr_reader :vm_id, :datastores, :sysds_id, :rootfs_id, :xml
 
-        def initialize(xml_file)
+        def initialize(xml_file, root = '')
             @xml = OpenNebula::XMLElement.new
-            @xml.initialize_xml(xml_file, 'VM')
+            @xml.initialize_xml(xml_file, root + 'VM')
             @vm_id = single_element('VMID')
             @datastores = datastores
             @sysds_id = xml_single_element('//HISTORY_RECORDS/HISTORY/DS_ID')
@@ -61,14 +62,7 @@ module LXDriver
         # Sets up the network interfaces configuration in devices
         def network(hash)
             nics = multiple_elements('NIC')
-            nics.each do |nic|
-                info = nic['NIC']
-                name = "eth#{info['NIC_ID']}"
-                eth = LXDriver.nic(name, info['TARGET'], info['BRIDGE'], info['MAC'])
-
-                # TODO: include nic_io in nic
-                hash[name] = LXDriver.nic_io(eth, info)
-            end
+            nics.each {|nic| hash.update(nic(nic['NIC'])) }
         end
 
         # Sets up the storage devices configuration in devices
@@ -88,7 +82,7 @@ module LXDriver
                     path = "/media/#{disk_id}" unless path.include?('/')
 
                     disk_config = { 'type' => 'disk', 'path' => path, 'source' => source }
-                    disk_config.update(LXDriver.disk_common(info))
+                    disk_config.update(disk_common(info))
 
                     hash['disk' + disk_id] = disk_config
                 end
@@ -97,19 +91,98 @@ module LXDriver
             # root
             info = disks[0]['DISK']
             root = { 'type' => 'disk', 'path' => '/', 'pool' => 'default' }
-            hash['root'] = root.update(LXDriver.disk_common(info))
+            hash['root'] = root.update(disk_common(info))
 
             # context
             hash.update(context) if single_element('CONTEXT')
         end
+
+        ###############
+        #   Network   #
+        ###############
+
+        # Creates a nic hash from NIC xml root
+        def nic(info)
+            name = 'eth' + info['NIC_ID']
+            eth = { 'name' => name, 'host_name' => info['TARGET'],
+                    'parent' => info['BRIDGE'], 'hwaddr' => info['MAC'],
+                    'nictype' => 'bridged', 'type' => 'nic' }
+            { name => eth.update(nic_io(info)) }
+        end
+
+        # Returns a hash with QoS NIC values if defined
+        def nic_io(info)
+            lxdl = %w[limits.ingress limits.egress]
+            onel = %w[INBOUND_AVG_BW OUTBOUND_AVG_BW]
+
+            nic_limits = io(lxdl, onel, info)
+            nic_limits.each do |key, value|
+                nic_limits[key] = nic_unit(value)
+            end
+            nic_limits
+        end
+
+        def nic_unit(limit)
+            (limit.to_i * 8).to_s + 'kbit'
+        end
+
+        ###############
+        #   Storage   #
+        ###############
 
         # Creates the context iso device hash
         def context
             info = complex_element('CONTEXT')
             disk_id = info['DISK_ID']
             source = LXDriver.device_path(self, "#{@vm_id}/mapper", disk_id)
-            data = LXDriver.disk(source, '/mnt')
+            data = disk(source, '/mnt')
             { 'context' => data }
+        end
+
+        # TODO: IO
+        # TODO: disk_common
+        # Creates a disk hash
+        def disk(source, path)
+            { 'type' => 'disk', 'source' => source, 'path' => path }
+        end
+
+        def disk_common(info)
+            config = { 'readonly' => 'false' }
+            config['readonly'] = 'true' if info['READONLY'] == 'yes'
+            disk_io(config, info)
+        end
+
+        # TODO: TOTAL_IOPS_SEC
+        def disk_io(disk, info)
+            lxdl = %w[limits.read limits.write limits.max]
+            onel = %w[READ_BYTES_SEC WRITE_BYTES_SEC TOTAL_BYTES_SEC]
+            disk.update(io(lxdl, onel, info))
+        end
+
+        ###############
+        #    Misc     #
+        ###############
+
+        # Creates a hash with the keys defined in lxd_keys if the
+        # corresponding key in xml_keys with the same index is defined in info
+        def keyfexist(lxd_keys, xml_keys, info)
+            hash = {}
+            0.upto(lxd_keys.length) do |i|
+                value = info[xml_keys[i]]
+                hash[lxd_keys[i]] = value if value
+            end
+            hash
+        end
+
+        # Maps existing one_limits into lxd_limits
+        def io(lxdl, onel, info)
+            limits = keyfexist(lxdl, onel, info)
+            if limits != {}
+                limits.each do |limit, value|
+                    limits[limit] = value
+                end
+            end
+            limits
         end
 
         ###############

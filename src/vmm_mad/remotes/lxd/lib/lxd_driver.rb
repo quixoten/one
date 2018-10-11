@@ -58,56 +58,9 @@ module LXDriver
             (Time.now - time).to_s
         end
 
-        ###############
-        #   Network   #
-        ###############
-
-        # TODO: QoS
-        # Creates a nic hash
-        def nic(name, host_name, bridge, mac)
-            { 'name' => name, 'host_name' => host_name,
-              'parent' => bridge, 'hwaddr' => mac,
-              'nictype' => 'bridged', 'type' => 'nic' }
-        end
-
-        def nic_unit(limit)
-            (limit.to_i * 8).to_s + 'kbit'
-        end
-
-        # Returns a hash with QoS NIC values if defined
-        def nic_io(nic, info)
-            lxdl = %w[limits.ingress limits.egress]
-            onel = %w[INBOUND_AVG_BW OUTBOUND_AVG_BW]
-
-            nic_limits = io(lxdl, onel, info)
-            nic_limits.each do |key, value|
-                nic_limits[key] = nic_unit(value)
-            end
-            nic.update(nic_limits)
-        end
-
-        ###############
-        #   Storage   #
-        ###############
-
-        # TODO: IO
-        # TODO: disk_common
-        # Creates a disk hash
-        def disk(source, path)
-            { 'type' => 'disk', 'source' => source, 'path' => path }
-        end
-
-        def disk_common(info)
-            config = { 'readonly' => 'false' }
-            config['readonly'] = 'true' if info['READONLY'] == 'yes'
-            disk_io(config, info)
-        end
-
-        # TODO: TOTAL_IOPS_SEC
-        def disk_io(disk, info)
-            lxdl = %w[limits.read limits.write limits.max]
-            onel = %w[READ_BYTES_SEC WRITE_BYTES_SEC TOTAL_BYTES_SEC]
-            disk.update(io(lxdl, onel, info))
+        # Creates an XML object from driver action template
+        def action_xml
+            XML.new(STDIN.read, XML::HOTPLUG_PREFIX)
         end
 
         # Returns a mapper class depending on the driver string
@@ -124,48 +77,8 @@ module LXDriver
             "#{info.datastores}/#{info.sysds_id}/#{vm_id}/disk.#{disk_id}"
         end
 
-        ###############
-        #    Misc     #
-        ###############
-
-        # Creates a hash with the keys defined in lxd_keys if the
-        # corresponding key in xml_keys with the same index is defined in info
-        def keyfexist(lxd_keys, xml_keys, info)
-            hash = {}
-            0.upto(lxd_keys.length) do |i|
-                value = info[xml_keys[i]]
-                hash[lxd_keys[i]] = value if value
-            end
-            hash
-        end
-
-        # Maps existing one_limits into lxd_limits
-        def io(lxdl, onel, info)
-            limits = keyfexist(lxdl, onel, info)
-            if limits != {}
-                limits.each do |limit, value|
-                    limits[limit] = value
-                end
-            end
-            limits
-        end
-
         # TODO: VNC server
         def vnc(info); end
-
-        # TODO: Check if not needed (XML available STDIN)
-        # Saves deployment path to container yaml
-        def deployment_save(xml, path, container)
-            f = File.new(path, 'w')
-            f.write(xml)
-            f.close
-            container.config['user.xml'] = path
-            container.update
-        end
-
-        def deployment_get(container)
-            XML.new(File.open(container.config['user.xml']))
-        end
 
         ###############
         #  Container  #

@@ -21,12 +21,11 @@ require_relative 'lib/lxd_driver'
 
 LXDriver.log_init
 
-xml_path = ARGV[0] # Deployment path
+xml_path = ARGV[0]
 vm_id = ARGV[2]
-xml_file = STDIN.read
 
 # Map one xml into LXD yaml
-info = LXDriver::XML.new(xml_file)
+info = LXDriver::XML.new(STDIN.read)
 yaml = LXDriver::YAML.new(info)
 
 # Create container object
@@ -38,7 +37,6 @@ LXDriver.container_create(container, client)
 # Setup required mounts
 LXDriver.container_storage(info, 'map')
 LXDriver.container_start(container, info)
-LXDriver.deployment_save(xml_file, xml_path, container)
 
 LXDriver.vnc(info)
 
