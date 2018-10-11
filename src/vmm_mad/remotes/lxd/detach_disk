@@ -1,0 +1,29 @@
+#!/usr/bin/ruby
+
+t0 = Time.now
+require_relative 'lib/lxd_driver'
+require 'base64'
+
+LXDriver.log_init
+
+vm_name = ARGV[0]
+image_path = ARGV[1]
+target = ARGV[2]
+disk_index = ARGV[3]
+vm_id = ARGV[4]
+vm_name = 'one-' + vm_id
+
+info = LXDriver.action_xml
+disks = info.multiple_elements('DISK')
+disk_info = info.device_info(disks, 'DISK', target)
+
+client = LXDClient.new
+container = Container.get(vm_name, client)
+
+mount = container.devices.delete('disk' + disk_info['DISK_ID'])['source']
+container.update
+
+mapper = LXDriver.select_driver(disk_info['DRIVER'])
+mapper.run('unmap', mount)
+
+LXDriver.log_end(t0)

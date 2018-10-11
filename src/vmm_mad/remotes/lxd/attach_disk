@@ -13,22 +13,25 @@ disk_index = ARGV[3]
 xml = ARGV[4]
 vm_id = ARGV[5]
 
+# xml creation
 info = LXDriver.action_xml(Base64.decode64(xml))
 disks = info.multiple_elements('DISK')
 disk_info = info.device_info(disks, 'DISK', target)
 
+# post_process
 disk_hash = info.disk(disk_info)
-mapper = LXDriver.select_driver(disk_info['DRIVER'])
-source = disk_hash.values[0]['source']
-disk_id = source.split('.')[-1]
-device = LXDriver.device_path(info, disk_id)
 
 client = LXDClient.new
 container = Container.get(vm_name, client)
 
+# mount and container disk creation
+source = disk_hash.values[0]['source']
+disk_id = source.split('.')[-1]
+device = LXDriver.device_path(info, disk_id)
+mapper = LXDriver.select_driver(disk_info['DRIVER'])
 mapper.run('map', source, device)
-container.devices.update(disk_hash)
 
+container.devices.update(disk_hash)
 container.update
 
 LXDriver.log_end(t0)
