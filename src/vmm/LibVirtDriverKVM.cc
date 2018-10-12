@@ -165,6 +165,7 @@ int LibVirtDriver::deployment_description_kvm(
     int       num;
 
     string  vcpu;
+    string  vcpu_placement;
     float   cpu;
     int     memory;
 
@@ -306,13 +307,14 @@ int LibVirtDriver::deployment_description_kvm(
 
     const VectorAttribute * features;
 
-    bool pae                = false;
-    bool acpi               = false;
-    bool apic               = false;
-    bool hyperv             = false;
-    bool localtime          = false;
-    bool guest_agent        = false;
-    int  virtio_scsi_queues = 0;
+    bool pae                 = false;
+    bool acpi                = false;
+    bool apic                = false;
+    bool hyperv              = false;
+    bool localtime           = false;
+    bool guest_agent         = false;
+    int  virtio_scsi_queues  = 0;
+    int  auto_vcpu_placement = false;
 
     int pae_found                   = -1;
     int acpi_found                  = -1;
@@ -321,6 +323,7 @@ int LibVirtDriver::deployment_description_kvm(
     int localtime_found             = -1;
     int guest_agent_found           = -1;
     int virtio_scsi_queues_found    = -1;
+    int auto_vcpu_placement_found   = -1;
 
     string hyperv_options = "";
 
@@ -366,7 +369,8 @@ int LibVirtDriver::deployment_description_kvm(
 
     if (!vcpu.empty())
     {
-        file << "\t<vcpu>" << one_util::escape_xml(vcpu) << "</vcpu>" << endl;
+        vcpu_placement = auto_vcpu_placement ? " placement='auto'" : "";
+        file << "\t<vcpu" << vcpu_placement << ">" << one_util::escape_xml(vcpu) << "</vcpu>" << endl;
     }
 
     //Every process gets 1024 shares by default (cgroups), scale this with CPU
@@ -1348,6 +1352,8 @@ int LibVirtDriver::deployment_description_kvm(
         guest_agent_found = features->vector_value("GUEST_AGENT", guest_agent);
         virtio_scsi_queues_found =
             features->vector_value("VIRTIO_SCSI_QUEUES", virtio_scsi_queues);
+        auto_vcpu_placement_found =
+            features->vector_value("AUTO_VCPU_PLACEMENT", auto_vcpu_placement);
     }
 
     if ( pae_found != 0 )
@@ -1383,6 +1389,11 @@ int LibVirtDriver::deployment_description_kvm(
     if ( virtio_scsi_queues_found != 0 )
     {
         get_default("FEATURES", "VIRTIO_SCSI_QUEUES", virtio_scsi_queues);
+    }
+
+    if ( auto_vcpu_placement_found != 0 )
+    {
+        get_default("FEATURES", "AUTO_VCPU_PLACEMENT", auto_vcpu_placement);
     }
 
     if ( acpi || pae || apic || hyperv )
